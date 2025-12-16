@@ -1,0 +1,39 @@
+local Format = {}
+
+function Format.deepCopy(original : Table)
+    -- This table keeps track of tables already copied to prevent infinite recursion
+    -- due to circular references (where TableA references TableB, and TableB references TableA)
+    local copies = {} 
+    
+    local function copy(object)
+        -- Primitive types (numbers, strings, booleans, nil) are copied by value
+        if type(object) ~= "table" then
+            return object
+        end
+
+        -- Check if the table has already been copied (circular reference handling)
+        if copies[object] then
+            return copies[object]
+        end
+
+        -- Create the new, empty table
+        local new_table = {}
+        
+        -- Store the new table in the 'copies' map immediately, before recursion.
+        -- This ensures any nested reference to the original table will point to this new one.
+        copies[object] = new_table
+
+        -- Iterate over all key-value pairs in the original table
+        for key, value in pairs(object) do
+            -- Recursively copy the key and the value
+            new_table[copy(key)] = copy(value)
+        end
+        
+        return new_table
+    end
+
+    -- Start the copy process
+    return copy(original)
+end
+
+return Format

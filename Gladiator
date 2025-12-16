@@ -1,0 +1,134 @@
+local Gladiator = {}
+
+local Paths = require(script.Parent)
+local Services = Paths.Services
+local Dictionaries = Paths.Dictionaries
+local Modules = Paths.Modules
+
+function Gladiator.load(player, gladiatorId : String)
+    local dataManager = Modules.DataManager.getPlayerDataManager(player)
+    if not dataManager then
+        return
+    end
+
+    if not dataManager.Data.Gladiators[gladiatorId] then
+        return
+    end
+
+    if dataManager.Data.GladiatorLoaded == gladiatorId then
+        Gladiator.unload(player)
+    end
+
+    dataManager:setData("GladiatorLoaded", gladiatorId, "Set")
+
+    Modules.CharacterManager.loadAppearance(gladiatorId)
+end
+
+function Gladiator.unload(player)
+    local dataManager = Modules.DataManager.getPlayerDataManager(player)
+    if not dataManager then
+        return
+    end
+
+    dataManager:setData("GladiatorLoaded", "none", "Set")
+end
+
+local creationData = {
+    "Name", "Hair", "FacialHair", "HairColor", "Face", "SkinColor",
+    "Mode"    
+}
+
+function Gladiator.create(player, data : Table)
+    local dataManager = Modules.DataManager.getPlayerDataManager(player)
+    if not dataManager then
+        return
+    end
+
+    if not Gladiator.canCreate(player) then
+        return
+    end
+
+    local gladiatorData  = Dictionaries.Format.deepCopy(Dictionaries.GladiatorInfo.Template)
+
+    for _, dataName in pairs(creationData) do
+        if data[dataName] and typeof(data[dataName]) == "string" then
+            if gladiatorData.Appearance[dataName] then
+                if table.find(Dictionaries.GladiatorInfo.DataValidation[dataName], data[dataName]) then
+                    gladiatorData.Appearance[dataName] = data[dataName]
+                end           
+            elseif gladiatorData.Stats[dataName] then
+                if table.find(Dictionaries.GladiatorInfo.DataValidation[dataName], data[dataName]) then
+                    gladiatorData.Stats[dataName] = data[dataName]
+                end             
+            end               
+        end
+    end
+
+    local gladiatorId = "Gladiator"..dataManager.Data.GladiatorId
+    dataManager:setData("GladiatorId", 1, "Add")
+
+    dataManager.Data.Gladiators[galdaitorId] = gladiatorData
+end
+
+function Gladiator.remove(player, gladiatorId : String)
+    local dataManager = Modules.DataManager.getPlayerDataManager(player)
+    if not dataManager then
+        return
+    end
+
+    if not dataManager.Data.Gladiators[gladiatorId] then
+        return
+    end
+
+    if dataManager.Data.GladiatorLoaded == gladiatorId then
+        Gladiator.unload(player)
+    end
+
+    dataManager.Data.RemovedGladiators[gladiatorId] = Dictionaries.Format.deepCopy(dataManager.Data.Gladiators[gladiatorId])
+    dataManager.Data.Gladiators[gladiatorId] = nil
+end
+
+
+function Gladiator.canCreate(player)
+    local dataManager = Modules.DataManager.getPlayerDataManager(player)
+    if not dataManager then
+        return false
+    end
+
+    local gladiatorCount = 0
+    local gladiatorLimit = Dictionaries.GladiatorInfo.gladiatorLimit
+
+    local extraSlotsOwned = 0
+    for i = 1, 5 do
+        local pass = "ExtraGladiator"..i
+        local passIndex = Dictionaries.BitReader.GamepassIndex[pass]
+        if passIndex then
+            if Dictionaries.BitReader.isTrue(data.Data.Gamepasses, passIndex) then
+                gladiatorLimit += 1
+                extraSlotsOwned += 1
+            end
+        end
+    end
+
+    for galdaitorId, data in pairs(dataManager.Data.Gladiators) do
+        gladiatorCount += 1
+    end
+
+    if gladiatorCount < gladiatorLimit then
+        return true
+    else
+        if extraSlotsOwned < Dictionaries.ShopInfo.ExtraGladiatorCount then
+            local pass = "ExtraGladiator"..(extraSlotsOwned + 1)
+            local passId = Dictionaries.ShopInfo.GamepassIds[pass]
+            if passId then
+                Modules.Gamepass.promptGamePassPurchase(player, passId)
+            end
+        end
+    end
+end
+
+Paths.RemoteHandler.setServerCallback("CreateGladiator", function(player)
+	return Gladiator.canCreate(player)
+end, {})
+
+return Gladiator

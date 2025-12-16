@@ -1,0 +1,70 @@
+local GladiatorInfo = {}
+
+GladiatorInfo.DataValidation = {
+    Mode = {"Easy"},
+    Hair = {"Hair1"},
+    FacialHair = {"Facial1"},
+    HairColor = {"000000"},
+    Face = {"Face1"},
+    SkinColor = {"000000"}
+}
+
+GladiatorInfo.Template = {
+    Stats = {
+        Level 0,
+        Experience = 0,
+        Coins = 0,
+        
+        Mode = "Easy"
+    },
+
+    Progress = {
+        Fights = 0,
+        Wins = 0,
+        Loses = 0,
+
+        TournametStatus1 = 0, --bit number
+    },
+            
+    Appearance = {
+        Name = "Maximus",
+        Hair = "Hair1",
+        FacialHair = "Facial1",
+        HairColor = "000000",
+        Face = "Face1",
+        SkinColor = "000000"
+    },
+
+    Abilities = {
+        Strength = 0,
+        Attack = 0,
+        Defence = 0,
+        Vitality = 0,
+        Stamina = 0,
+        Agility = 0,
+        Magicka = 0,
+        Charisma = 0
+    },
+
+    Skills = {
+        Fireball = 0,             
+    },        
+
+    Items = {
+        BasicClub = true
+    },
+
+    Equipped = {
+        --weapon
+        Weapon - "BasicClub",
+        --armor
+        Helmet = "none",
+        Breastplate = "none",
+        Shoulderguards = "none",
+        Gloves = "none",
+        Boots = "none",
+        Shield = "none"
+    }, 
+}
+
+return GladiatorInfo

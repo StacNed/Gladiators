@@ -1,1 +1,28 @@
+local Data = {}
 
+local Paths = require(script.Parent.Parent)
+local Services = Paths.Services
+local Dictionaries = Paths.Dictionaries
+local Modules = Paths.Modules
+
+Data.Default = {
+    Stats = {
+
+    },
+
+    GladiatorLoaded = "none",
+
+    Gladiators = {
+        
+    },
+
+    RemovedGladiators = {
+        
+    }
+}
+
+function Data.update()
+
+end
+
+return Data
